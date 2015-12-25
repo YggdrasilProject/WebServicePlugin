@@ -13,7 +13,7 @@ public abstract class WebService extends YggdrasilService {
     private SocketAddress webServiceBindAddress;
 
     private List<WebServiceHandler> webServiceThreads = new LinkedList<>();
-    private Class<? extends WebServiceHandler> webServiceHandlerClass;
+    private Class<? extends WebServiceRouter> webServiceRouter;
 
     @Override
     protected void onInit() {
@@ -64,15 +64,15 @@ public abstract class WebService extends YggdrasilService {
             try {
                 Socket sock = webServiceSocket.accept();
 
-                WebServiceHandler clientHandler = webServiceHandlerClass.newInstance();
+                WebServiceHandler clientHandler = new WebServiceHandler();
 
-                clientHandler.setUp(core, sock);
+                clientHandler.setUp(core, webServiceRouter, sock);
                 clientHandler.start();
 
                 webServiceThreads.add(clientHandler);
             } catch (SocketException | SocketTimeoutException ignored) {
                 // Do nothing
-            } catch (IOException | InstantiationException | IllegalAccessException e) {
+            } catch (IOException e) {
                 logger.error("Unable to handle client request", e);
             }
         }
@@ -84,7 +84,7 @@ public abstract class WebService extends YggdrasilService {
 
     protected abstract void setUpWebService();
 
-    public void setHandlerClass(Class<? extends WebServiceHandler> handlerClass) {
-        webServiceHandlerClass = handlerClass;
+    public void setRouter(Class<? extends WebServiceRouter> routerClass) {
+        webServiceRouter = routerClass;
     }
 }

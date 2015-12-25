@@ -7,11 +7,12 @@ import ru.linachan.yggdrasil.YggdrasilCore;
 import java.io.IOException;
 import java.net.Socket;
 
-public abstract class WebServiceHandler implements Runnable {
+public class WebServiceHandler implements Runnable {
 
     protected YggdrasilCore core;
     private Thread handlerThread;
     private Socket clientSocket;
+    private WebServiceRouter router;
 
     private static Logger logger = LoggerFactory.getLogger(WebServiceHandler.class);
 
@@ -28,7 +29,11 @@ public abstract class WebServiceHandler implements Runnable {
         }
     }
 
-    protected abstract WebServiceResponse handleRequest(WebServiceRequest request);
+    private WebServiceResponse handleRequest(WebServiceRequest request) {
+        WebServiceRoute route = router.route(request.getUri());
+        route.setUp(core);
+        return route.handle(request);
+    }
 
     public boolean isAlive() {
         return handlerThread.isAlive();
@@ -38,10 +43,16 @@ public abstract class WebServiceHandler implements Runnable {
         handlerThread.start();
     }
 
-    public void setUp(YggdrasilCore yggdrasilCore, Socket sock) {
+    public void setUp(YggdrasilCore yggdrasilCore, Class<? extends WebServiceRouter> routerClass, Socket sock) {
         core = yggdrasilCore;
         clientSocket = sock;
         handlerThread = new Thread(this);
+        try {
+            router = routerClass.newInstance();
+            router.setUpRoutes();
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.error("Unable to instantiate router", e);
+        }
     }
 
     public void join() throws InterruptedException {
