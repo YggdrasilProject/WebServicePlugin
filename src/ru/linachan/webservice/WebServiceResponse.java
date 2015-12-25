@@ -1,10 +1,14 @@
 package ru.linachan.webservice;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,19 +77,32 @@ public class WebServiceResponse {
         return body;
     }
 
-    public void setBinaryBody(byte[] binaryData) {
+    public void binaryResponse(byte[] binaryData) {
         body = binaryData;
     }
 
-    public void setHTMLBody(String htmlData) {
+    public void htmlResponse(String htmlData) {
         setContentType("text/html");
         body = htmlData != null ? htmlData.getBytes() : new byte[0];
     }
 
-    public void setJSONBody(JSONObject jsonData) {
+    public void jsonResponse(JSONObject jsonData) {
         setContentType("application/json");
         JSONObject jsonObject = (jsonData != null) ? jsonData : new JSONObject();
         body = jsonObject.toJSONString().getBytes();
+    }
+
+    public void renderTemplate(String templateName, VelocityContext context) {
+        VelocityEngine templateRenderer = new VelocityEngine();
+        templateRenderer.init();
+
+        Template template = templateRenderer.getTemplate(templateName);
+
+        StringWriter renderResult = new StringWriter();
+        template.merge(context, renderResult);
+
+        setContentType("text/html");
+        body = renderResult.toString().getBytes();
     }
 
     public void setHeader(String header, String value) {

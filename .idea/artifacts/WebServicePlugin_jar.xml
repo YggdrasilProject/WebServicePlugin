@@ -3,6 +3,16 @@
     <output-path>$PROJECT_DIR$/</output-path>
     <root id="archive" name="WebServicePlugin.jar">
       <element id="module-output" name="WebServicePlugin" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/velocity/velocity/1.7/velocity-1.7.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-lang/commons-lang/2.4/commons-lang-2.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/jdom/jdom/1.0/jdom-1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1/commons-logging-1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/logkit/logkit/2.0/logkit-2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/log4j/log4j/1.2.12/log4j-1.2.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/ant/ant/1.6/ant-1.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/werken-xpath/werken-xpath/0.9.4/werken-xpath-0.9.4.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
