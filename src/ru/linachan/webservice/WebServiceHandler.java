@@ -6,7 +6,6 @@ import ru.linachan.yggdrasil.YggdrasilCore;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 public abstract class WebServiceHandler implements Runnable {
 
