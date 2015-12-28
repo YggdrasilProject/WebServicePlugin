@@ -17,7 +17,9 @@ public abstract class WebServiceRouter {
         try {
             for (Pattern pattern : routes.keySet()) {
                 if (pattern.matcher(uri).matches()) {
-                    return routes.get(pattern).newInstance();
+                    WebServiceRoute route =  routes.get(pattern).newInstance();
+                    route.setPattern(pattern);
+                    return route;
                 }
             }
         } catch (InstantiationException | IllegalAccessException e) {

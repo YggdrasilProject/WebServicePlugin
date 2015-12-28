@@ -2,38 +2,61 @@ package ru.linachan.webservice;
 
 import ru.linachan.yggdrasil.YggdrasilCore;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public abstract class WebServiceRoute {
 
     protected YggdrasilCore core;
+    private Pattern uriPattern;
+    private WebServiceRequest request;
+
+    public void setPattern(Pattern pattern) {
+        uriPattern = pattern;
+    }
 
     public void setUp(YggdrasilCore yggdrasilCore) {
         core = yggdrasilCore;
     }
 
-    public WebServiceResponse handle(WebServiceRequest request) {
-        WebServiceResponse response = null;
+    protected String getArg(String groupName) {
+        Matcher matcher = uriPattern.matcher(request.getUri());
+        if (matcher.matches()) {
+            try {
+                return matcher.group(groupName);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                return null;
+            }
+        }
 
-        switch (request.getMethod()) {
+        return null;
+    }
+
+    public WebServiceResponse handle(WebServiceRequest requestObject) {
+        WebServiceResponse response = null;
+        request = requestObject;
+
+        switch (requestObject.getMethod()) {
             case "OPTIONS":
-                response = OPTIONS(request);
+                response = OPTIONS(requestObject);
                 break;
             case "HEAD":
-                response = HEAD(request);
+                response = HEAD(requestObject);
                 break;
             case "GET":
-                response = GET(request);
+                response = GET(requestObject);
                 break;
             case "POST":
-                response = POST(request);
+                response = POST(requestObject);
                 break;
             case "PUT":
-                response = PUT(request);
+                response = PUT(requestObject);
                 break;
             case "PATCH":
-                response = PATCH(request);
+                response = PATCH(requestObject);
                 break;
             case "DELETE":
-                response = DELETE(request);
+                response = DELETE(requestObject);
                 break;
         }
 
