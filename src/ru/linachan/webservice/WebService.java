@@ -1,90 +1,45 @@
 package ru.linachan.webservice;
 
-import ru.linachan.yggdrasil.service.YggdrasilService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.linachan.tcpserver.TCPService;
+import ru.linachan.yggdrasil.YggdrasilCore;
 
 import java.io.IOException;
-import java.net.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public abstract class WebService extends YggdrasilService {
+public class WebService implements TCPService {
 
-    private ServerSocket webServiceSocket;
-    private SocketAddress webServiceBindAddress;
+    protected YggdrasilCore core;
+    private WebServiceRouter router;
 
-    private List<WebServiceHandler> webServiceThreads = new LinkedList<>();
-    private Class<? extends WebServiceRouter> webServiceRouter;
+    private static Logger logger = LoggerFactory.getLogger(WebService.class);
 
-    @Override
-    protected void onInit() {
-        setUpWebService();
-        if (webServiceBindAddress != null) {
-            try {
-                webServiceSocket = new ServerSocket();
-                webServiceSocket.bind(webServiceBindAddress);
-                webServiceSocket.setSoTimeout(1000);
-            } catch (IOException e) {
-                logger.error("Unable to create socket", e);
-            }
-        } else {
-            logger.warn("WebService instance not configured");
-        }
+    public WebService(WebServiceRouter router) {
+        this.router = router;
+        this.router.setUpRoutes();
+    }
+
+    public WebService(Class<? extends WebServiceRouter> routerClass) throws IllegalAccessException, InstantiationException {
+        this.router = routerClass.newInstance();
+        this.router.setUpRoutes();
     }
 
     @Override
-    protected void onShutdown() {
+    public void handleConnection(YggdrasilCore core, InputStream in, OutputStream out) {
         try {
-            if (webServiceSocket != null) {
-                webServiceSocket.close();
-            }
+            WebServiceRequest request = WebServiceRequest.readFromSocket(in);
+            WebServiceResponse response = (request != null) ? handleRequest(request) : null;
+            WebServiceResponse.writeToSocket(response, out);
         } catch (IOException e) {
-            logger.error("Unable to close socket", e);
+            logger.error("Unable to process client request", e);
         }
     }
 
-    @Override
-    public void run() {
-        while (isRunning()) {
-            List<WebServiceHandler> finishedServiceThreads = new LinkedList<>();
-            for (WebServiceHandler serviceThread : webServiceThreads) {
-                if (!serviceThread.isAlive()) {
-                    try {
-                        serviceThread.join();
-                    } catch (InterruptedException e) {
-                        logger.error("Unable to finish service thread correctly", e);
-                    }
-                    finishedServiceThreads.add(serviceThread);
-                }
-            }
-
-            for (WebServiceHandler finishedServiceThread : finishedServiceThreads) {
-                webServiceThreads.remove(finishedServiceThread);
-            }
-
-            try {
-                Socket sock = webServiceSocket.accept();
-
-                WebServiceHandler clientHandler = new WebServiceHandler();
-
-                clientHandler.setUp(core, webServiceRouter, sock);
-                clientHandler.start();
-
-                webServiceThreads.add(clientHandler);
-            } catch (SocketException | SocketTimeoutException ignored) {
-                // Do nothing
-            } catch (IOException e) {
-                logger.error("Unable to handle client request", e);
-            }
-        }
-    }
-
-    protected void setBindAddress(SocketAddress bindAddress) {
-        webServiceBindAddress = bindAddress;
-    }
-
-    protected abstract void setUpWebService();
-
-    public void setRouter(Class<? extends WebServiceRouter> routerClass) {
-        webServiceRouter = routerClass;
+    private WebServiceResponse handleRequest(WebServiceRequest request) {
+        WebServiceRoute route = router.route(request.getUri());
+        route.setUp(core);
+        return route.handle(request);
     }
 }

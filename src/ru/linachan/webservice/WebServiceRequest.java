@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import ru.linachan.webservice.utils.InputReader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
@@ -42,9 +43,8 @@ public class WebServiceRequest {
 
     private static Logger logger = LoggerFactory.getLogger(WebServiceRequest.class);
 
-    public static WebServiceRequest readFromSocket(Socket clientSocket) throws IOException {
-        clientSocket.setSoTimeout(10000);
-        InputReader requestReader = new InputReader(clientSocket.getInputStream());
+    public static WebServiceRequest readFromSocket(InputStream in) throws IOException {
+        InputReader requestReader = new InputReader(in);
 
         String startingString = requestReader.readLine();
         if (startingString != null) {

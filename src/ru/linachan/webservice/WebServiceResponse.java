@@ -5,10 +5,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,18 +17,20 @@ public class WebServiceResponse {
     private Map<String, String> cookies = new HashMap<>();
     private byte[] body = null;
 
+    private boolean headersOnly = false;
+
     public WebServiceResponse(WebServiceHTTPCode statusCode) {
         httpCode = statusCode;
 
         headers.put("Connection", "close");
     }
 
-    public static void writeToSocket(WebServiceResponse response, Socket clientSocket) throws IOException {
+    public static void writeToSocket(WebServiceResponse response, OutputStream out) throws IOException {
         if (response == null) {
             response = new WebServiceResponse(WebServiceHTTPCode.BAD_REQUEST);
         }
 
-        BufferedWriter responseWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+        BufferedWriter responseWriter = new BufferedWriter(new OutputStreamWriter(out));
 
         responseWriter.write(String.format("HTTP/1.0 %s\r\n", response.getCode())); responseWriter.flush();
 
@@ -52,13 +51,23 @@ public class WebServiceResponse {
 
         responseWriter.newLine(); responseWriter.flush();
 
-        if ((response.getBody() != null)&&(response.getBody().length > 0)) {
-            clientSocket.getOutputStream().write(response.getBody());
-            clientSocket.getOutputStream().flush();
+        if (!response.headersOnly()) {
+            if ((response.getBody() != null) && (response.getBody().length > 0)) {
+                out.write(response.getBody());
+                out.flush();
+            }
         }
 
-        clientSocket.getOutputStream().flush();
-        clientSocket.getOutputStream().close();
+        out.flush();
+        out.close();
+    }
+
+    private boolean headersOnly() {
+        return headersOnly;
+    }
+
+    public void headersOnly(boolean headersOnly) {
+        this.headersOnly = headersOnly;
     }
 
     private String getCode() {

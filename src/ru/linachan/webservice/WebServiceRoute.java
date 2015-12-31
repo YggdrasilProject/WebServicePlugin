@@ -63,7 +63,11 @@ public abstract class WebServiceRoute {
         return (response != null) ? response : new WebServiceResponse(WebServiceHTTPCode.METHOD_NOT_ALLOWED);
     }
 
-    protected abstract WebServiceResponse HEAD(WebServiceRequest request);
+    protected WebServiceResponse HEAD(WebServiceRequest request) {
+        WebServiceResponse response = GET(request);
+        response.headersOnly(true);
+        return response;
+    }
 
     protected abstract WebServiceResponse OPTIONS(WebServiceRequest request);
 
