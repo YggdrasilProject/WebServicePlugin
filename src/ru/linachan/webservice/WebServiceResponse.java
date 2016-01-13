@@ -6,7 +6,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONObject;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 

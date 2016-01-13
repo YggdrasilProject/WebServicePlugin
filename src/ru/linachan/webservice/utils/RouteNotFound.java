@@ -4,7 +4,7 @@ import ru.linachan.webservice.WebServiceRequest;
 import ru.linachan.webservice.WebServiceResponse;
 import ru.linachan.webservice.WebServiceRoute;
 
-public class NotFoundRoute extends WebServiceRoute {
+public class RouteNotFound extends WebServiceRoute {
 
     @Override
     protected WebServiceResponse HEAD(WebServiceRequest request) {

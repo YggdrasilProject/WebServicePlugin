@@ -3,7 +3,7 @@ package ru.linachan.webservice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.linachan.tcpserver.TCPService;
-import ru.linachan.webservice.utils.NotFoundRoute;
+import ru.linachan.webservice.utils.RouteNotFound;
 import ru.linachan.yggdrasil.YggdrasilCore;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class WebService implements TCPService {
             logger.error("Unable to instantiate router", e);
         }
 
-        return new NotFoundRoute();
+        return new RouteNotFound();
     }
 
     public void addRoute(String uriRegEx, Class<? extends WebServiceRoute> route) {
